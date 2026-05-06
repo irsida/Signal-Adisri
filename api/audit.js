@@ -42,16 +42,13 @@ module.exports = async function handler(req, res) {
       reqHttp.end();
     });
 
-    const parsed = JSON.parse(result.body);
-
-    if (result.status !== 200) {
-      return res.status(result.status).json({ error: parsed.error?.message || 'Anthropic API error' });
-    }
-
-    const text = parsed.content?.map(b => b.text || '').join('') || '';
-    return res.status(200).json({ result: text });
+    return res.status(200).json({ 
+      debug: true,
+      anthropic_status: result.status,
+      anthropic_response: result.body,
+      api_key_present: !!process.env.ANTHROPIC_API_KEY,
+      api_key_prefix: process.env.ANTHROPIC_API_KEY?.slice(0, 10) + '...'
+    });
 
   } catch(err) {
-    return res.status(500).json({ error: 'Server error: ' + err.message });
-  }
-};
+    return res.status(200).json({ debug: true, error: err.messag
