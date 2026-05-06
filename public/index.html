@@ -1,21 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signal — AI Content Audit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-Signal
-AI CONTENT AUDIT
-BUILT FOR GROWTH MARKETERS
-Stop posting noise. Start publishing signal.
-Paste any post and get an instant AI audit — tone, structure, SEO, GEO, AEO scores, and a rewrite that actually sounds human.
-BRAND / HANDLE
-NICHE / INDUSTRY
-PLATFORM
-LinkedIn
-Instagram
-TikTok
-X / Twitter
-YouTube
-Substack
-PASTE YOUR POST
+    :root {
+      --navy: #0D2137;
+      --teal: #1D9E75;
+      --teal-dark: #0F6E56;
+      --teal-light: #E1F5EE;
+      --teal-mid: #9FE1CB;
+      --text: #1a1a2e;
+      --text-secondary: #5a6a7a;
+      --text-tertiary: #8a9aaa;
+      --bg: #f8fafb;
+      --surface: #ffffff;
+      --border: rgba(0,0,0,0.08);
+      --border-hover: rgba(0,0,0,0.15);
+      --win-bg: #E1F5EE;
+      --win-text: #0F6E56;
+      --fix-bg: #FCEBEB;
+      --fix-text: #A32D2D;
+      --boost-bg: #FAEEDA;
+      --boost-text: #854F0B;
+      --good: #1D9E75;
+      --mid: #BA7517;
+      --low: #E24B4A;
+    }
 
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
 
-Run audit
-Built by Adisri Narayan  ·  Powered by Claude
+    /* NAV */
+    nav {
+      background: var(--navy);
+      padding: 0 2rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-mark {
+      width: 28px; height: 28px; background: var(--teal-dark);
+      border-radius: 7px; display: flex; align-items: center; justify-content: center;
+    }
+    .nav-mark svg { width: 16px; height: 16px; }
+    .nav-wordmark { font-family: 'DM Serif Display', serif; font-size: 20px; color: #fff; }
+    .nav-tagline { font-size: 11px; color: var(--teal-mid); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
 
+    /* HERO */
+    .hero {
+      background: var(--navy);
+      padding: 4rem 2rem 5rem;
+      text-align: center;
+    }
+    .hero-eyebrow {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--teal-mid); margin-bottom: 1rem;
+    }
+    .hero-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      color: #fff; line-height: 1.15; margin-bottom: 1rem;
+    }
+    .hero-title em { color: var(--teal-mid); font-style: italic; }
+    .hero-sub {
+      font-size: 16px; color: rgba(255,255,255,0.6);
+      max-width: 500px; margin: 0 auto; line-height: 1.6;
+    }
+
+    /* CARD */
+    .card-wrap { max-width: 760px; margin: -2.5rem auto 3rem; padding: 0 1.5rem; }
+    .card {
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: 0 4px 40px rgba(0,0,0,0.10);
+      overflow: hidden;
+    }
+
+    /* FORM */
+    .form-zone { padding: 2rem; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
+    .field-label {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-secondary); margin-bottom: 6px;
+    }
+    .field-input {
+      width: 100%; font-family: 'Outfit', sans-serif; font-size: 14px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px; color: var(--text);
+      outline: none; transition: border-color 0.15s;
+    }
+    .field-input:focus { border-color: var(--teal); }
+    .field-input::placeholder { color: var(--text-tertiary); }
+    textarea.field-input { resize: vertical; min-height: 130px; }
+
+    .platforms { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .chip {
+      font-size: 12px; font-weight: 500; padding: 5px 13px;
+      border-radius: 20px; border: 1px solid var(--border);
+      cursor: pointer; background: var(--surface); color: var(--text-secondary);
+      transition: all 0.15s; user-select: none;
+    }
+    .chip.active { background: var(--teal-dark); color: var(--teal-light); border-color: var(--teal-dark); }
+    .chip:hover:not(.active) { border-color: var(--border-hover); color: var(--text); }
+
+    .audit-btn {
+      width: 100%; padding: 13px; background: var(--teal-dark);
+      color: var(--teal-light); border: none; border-radius: 8px;
+      font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 500;
+      cursor: pointer; letter-spacing: 0.02em; transition: background 0.15s;
+    }
+    .audit-btn:hover { background: var(--teal); }
+    .audit-btn:disabled { background: #e0e4e8; color: #aaa; cursor: not-allowed; }
+
+    .error-msg {
+      margin-top: 1rem; padding: 12px 16px; background: var(--fix-bg);
+      color: var(--fix-text); border-radius: 8px; font-size: 14px; display: none;
+    }
+    .error-msg.show { display: block; }
+
+    /* LOADING */
+    .loading {
+      padding: 2.5rem; text-align: center;
+      border-top: 1px solid var(--border); display: none;
+    }
+    .loading.show { display: block; }
+    .dots { display: flex; gap: 7px; justify-content: center; margin-bottom: 14px; }
+    .dot {
+      width: 9px; height: 9px; border-radius: 50%; background: var(--teal);
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse {
+      0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+      40% { opacity: 1; transform: scale(1); }
+    }
+    .loading-text { font-size: 13px; color: var(--text-secondary); }
+
+    /* RESULTS */
+    .results { display: none; border-top: 1px solid var(--border); }
+    .results.show { display: block; }
+
+    .scores { display: grid; grid-template-columns: repeat(4,1fr); gap: 0; }
+    .score-cell {
+      padding: 1.5rem 1rem; text-align: center;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .score-cell:last-child { border-right: none; }
+    .score-lbl { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 8px; }
+    .score-num { font-size: 32px; font-weight: 600; line-height: 1; }
+    .score-num.good { color: var(--good); }
+    .score-num.mid { color: var(--mid); }
+    .score-num.low { color: var(--low); }
+    .score-note { font-size: 11px; color: var(--text-tertiary); margin-top: 5px; }
+
+    .audit-body { padding: 2rem; }
+    .audit-block { margin-bottom: 2rem; }
+    .audit-block:last-child { margin-bottom: 0; }
+    .block-title {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-secondary);
+      margin-bottom: 10px; padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .audit-row { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .audit-row:last-child { border-bottom: none; }
+    .tag {
+      flex-shrink: 0; font-size: 10px; font-weight: 500;
+      padding: 3px 8px; border-radius: 4px;
+      letter-spacing: 0.05em; text-transform: uppercase;
+      align-self: flex-start; margin-top: 2px;
+    }
+    .tag-win { background: var(--win-bg); color: var(--win-text); }
+    .tag-fix { background: var(--fix-bg); color: var(--fix-text); }
+    .tag-boost { background: var(--boost-bg); color: var(--boost-text); }
+    .row-text { font-size: 14px; color: var(--text); line-height: 1.55; }
+
+    .rewrite {
+      background: var(--bg); border-left: 3px solid var(--teal);
+      border-radius: 0 8px 8px 0; padding: 16px 18px; margin-top: 10px;
+    }
+    .rewrite-lbl { font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal); margin-bottom: 8px; }
+    .rewrite-text { font-size: 14px; line-height: 1.65; color: var(--text); white-space: pre-wrap; }
+
+    .reset-btn {
+      display: block; margin: 1.5rem auto 0;
+      font-size: 13px; color: var(--text-secondary);
+      background: none; border: none; cursor: pointer;
+      text-decoration: underline; font-family: 'Outfit', sans-serif;
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center; padding: 2rem;
+      font-size: 12px; color: var(--text-tertiary);
+    }
+    footer a { color: var(--teal); text-decoration: none; }
+
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .scores { grid-template-columns: repeat(2,1fr); }
+      .score-cell:nth-child(2) { border-right: none; }
+      .score-cell:nth-child(3) { border-right: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="/">
+    <div class="nav-mark">
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 1.5v13M3.5 5.5L8 1.5l4.5 4M3.5 10.5L8 14.5l4.5-4" stroke="#9FE1CB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <span class="nav-wordmark">Signal</span>
+  </a>
+  <span class="nav-tagline">AI Content Audit</span>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">Built for growth marketers</div>
+  <h1 class="hero-title">Stop posting noise.<br><em>Start publishing signal.</em></h1>
+  <p class="hero-sub">Paste any post and get an instant AI audit — tone, structure, SEO, GEO, AEO scores, and a rewrite that actually sounds human.</p>
+</div>
+
+<div class="card-wrap">
+  <div class="card">
+    <div class="form-zone">
+      <div class="form-grid">
+        <div>
+          <div class="field-label">Brand / Handle</div>
+          <input class="field-input" id="brand" placeholder="e.g. @toplinepro or Solo Energy" />
+        </div>
+        <div>
+          <div class="field-label">Niche / Industry</div>
+          <input class="field-input" id="niche" placeholder="e.g. B2B SaaS, home services" />
+        </div>
+      </div>
+
+      <div class="field-label">Platform</div>
+      <div class="platforms">
+        <span class="chip" onclick="this.classList.toggle('active')">LinkedIn</span>
+        <span class="chip" onclick="this.classList.toggle('active')">Instagram</span>
+        <span class="chip" onclick="this.classList.toggle('active')">TikTok</span>
+        <span class="chip" onclick="this.classList.toggle('active')">X / Twitter</span>
+        <span class="chip" onclick="this.classList.toggle('active')">YouTube</span>
+        <span class="chip" onclick="this.classList.toggle('active')">Substack</span>
+      </div>
+
+      <div class="field-label">Paste your post</div>
+      <textarea class="field-input" id="post" placeholder="Paste the full text of your social post, caption, newsletter, or script here..."></textarea>
+      <br /><br />
+
+      <button class="audit-btn" id="btn" onclick="runAudit()">Run audit</button>
+      <div class="error-msg" id="err"></div>
+    </div>
+
+    <div class="loading" id="loading">
+      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <div class="loading-text">Analyzing signal strength...</div>
+    </div>
+
+    <div class="results" id="results">
+      <div class="scores" id="scores"></div>
+      <div class="audit-body" id="body"></div>
+      <button class="reset-btn" onclick="reset()">Run another audit</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Built by <a href="https://linkedin.com/in/adisrinarayan" target="_blank">Adisri Narayan</a> &nbsp;·&nbsp; Powered by Claude
+</footer>
+
+<script>
+function getPlatforms() {
+  return [...document.querySelectorAll('.chip.active')].map(c => c.textContent).join(', ') || 'unspecified';
+}
+
+function scoreClass(n) {
+  return n >= 75 ? 'good' : n >= 50 ? 'mid' : 'low';
+}
+
+function showErr(msg) {
+  const el = document.getElementById('err');
+  el.textContent = msg; el.classList.add('show');
+  document.getElementById('btn').disabled = false;
+  document.getElementById('loading').classList.remove('show');
+}
+
+function reset() {
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('post').value = '';
+  document.getElementById('brand').value = '';
+  document.getElementById('niche').value = '';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('btn').disabled = false;
+  document.getElementById('err').classList.remove('show');
+}
+
+async function runAudit() {
+  const post = document.getElementById('post').value.trim();
+  if (!post) { showErr('Please paste a post to audit.'); return; }
+
+  const brand = document.getElementById('brand').value.trim() || 'this brand';
+  const niche = document.getElementById('niche').value.trim() || 'unspecified industry';
+  const platforms = getPlatforms();
+
+  document.getElementById('btn').disabled = true;
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('err').classList.remove('show');
+
+  const prompt = `You are Signal, an AI content audit tool for growth marketers. Audit this social post for ${brand} in the ${niche} niche, posted on ${platforms}.
+
+POST:
+"""
+${post}
+"""
+
+Return ONLY valid JSON — no markdown, no backticks:
+{
+  "scores": { "overall": <0-100>, "aeo": <0-100>, "geo": <0-100>, "engagement": <0-100> },
+  "score_notes": { "overall": "<5 words>", "aeo": "<5 words>", "geo": "<5 words>", "engagement": "<5 words>" },
+  "wins": [ { "text": "<specific win and why it works>" } ],
+  "fixes": [ { "text": "<specific problem and why it hurts>" }, { "text": "<specific problem>" } ],
+  "boosts": [ { "text": "<optimization opportunity with rationale>" }, { "text": "<optimization opportunity>" } ],
+  "rewrite": "<full rewritten post — sharper hook, better structure, platform-native, AEO/GEO optimized>"
+}
+
+Rules: wins 1-2 items, fixes 2-3 items, boosts 2-3 items. Be brutally specific — name exact phrases or structural issues. AEO = likelihood AI answer engine surfaces this. GEO = optimized for generative AI results. Rewrite must feel like a human wrote it.`;
+
+  try {
+    const res = await fetch('/api/audit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+
+    if (!res.ok) throw new Error(`Server error: ${res.status}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    const match = data.result.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('Could not parse audit response.');
+    const audit = JSON.parse(match[0]);
+    renderResults(audit);
+  } catch(e) {
+    showErr('Audit failed: ' + (e.message || 'Please try again.'));
+  } finally {
+    document.getElementById('loading').classList.remove('show');
+  }
+}
+
+function renderResults(a) {
+  const { scores, score_notes, wins, fixes, boosts, rewrite } = a;
+
+  document.getElementById('scores').innerHTML = `
+    <div class="score-cell"><div class="score-lbl">Overall</div><div class="score-num ${scoreClass(scores.overall)}">${scores.overall}</div><div class="score-note">${score_notes.overall}</div></div>
+    <div class="score-cell"><div class="score-lbl">AEO</div><div class="score-num ${scoreClass(scores.aeo)}">${scores.aeo}</div><div class="score-note">${score_notes.aeo}</div></div>
+    <div class="score-cell"><div class="score-lbl">GEO</div><div class="score-num ${scoreClass(scores.geo)}">${scores.geo}</div><div class="score-note">${score_notes.geo}</div></div>
+    <div class="score-cell"><div class="score-lbl">Engagement</div><div class="score-num ${scoreClass(scores.engagement)}">${scores.engagement}</div><div class="score-note">${score_notes.engagement}</div></div>
+  `;
+
+  let html = '';
+  if (wins?.length) {
+    html += `<div class="audit-block"><div class="block-title">What's working</div>`;
+    wins.forEach(w => { html += `<div class="audit-row"><span class="tag tag-win">Win</span><div class="row-text">${w.text}</div></div>`; });
+    html += `</div>`;
+  }
+  if (fixes?.length) {
+    html += `<div class="audit-block"><div class="block-title">Fix these</div>`;
+    fixes.forEach(f => { html += `<div class="audit-row"><span class="tag tag-fix">Fix</span><div class="row-text">${f.text}</div></div>`; });
+    html += `</div>`;
+  }
+  if (boosts?.length) {
+    html += `<div class="audit-block"><div class="block-title">Optimization opportunities</div>`;
+    boosts.forEach(b => { html += `<div class="audit-row"><span class="tag tag-boost">Boost</span><div class="row-text">${b.text}</div></div>`; });
+    html += `</div>`;
+  }
+  if (rewrite) {
+    html += `<div class="audit-block"><div class="block-title">Suggested rewrite</div><div class="rewrite"><div class="rewrite-lbl">Signal rewrite</div><div class="rewrite-text">${rewrite}</div></div></div>`;
+  }
+
+  document.getElementById('body').innerHTML = html;
+  document.getElementById('results').classList.add('show');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>
