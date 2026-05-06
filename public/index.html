@@ -10,39 +10,41 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --navy: #0D2137;
-      --teal: #1D9E75;
-      --teal-dark: #0F6E56;
-      --teal-light: #E1F5EE;
-      --teal-mid: #9FE1CB;
-      --text: #1a1a2e;
-      --text-secondary: #5a6a7a;
-      --text-tertiary: #8a9aaa;
-      --bg: #f8fafb;
-      --surface: #ffffff;
-      --border: rgba(0,0,0,0.08);
-      --border-hover: rgba(0,0,0,0.15);
-      --win-bg: #E1F5EE;
-      --win-text: #0F6E56;
+      --burgundy: #6B3A3A;
+      --burgundy-dark: #4A2828;
+      --burgundy-light: #F5EDE8;
+      --burgundy-mid: #C4918A;
+      --sand: #EDE8DF;
+      --sand-dark: #E0D9CE;
+      --cream: #FAF7F2;
+      --text: #2C1F1F;
+      --text-secondary: #6B5A5A;
+      --text-tertiary: #9A8A8A;
+      --bg: var(--sand);
+      --surface: var(--cream);
+      --border: rgba(107,58,58,0.12);
+      --border-hover: rgba(107,58,58,0.25);
+      --win-bg: #E8F5EE;
+      --win-text: #2D6A4F;
       --fix-bg: #FCEBEB;
       --fix-text: #A32D2D;
-      --boost-bg: #FAEEDA;
+      --boost-bg: #FDF3E3;
       --boost-text: #854F0B;
-      --good: #1D9E75;
+      --good: #2D6A4F;
       --mid: #BA7517;
-      --low: #E24B4A;
+      --low: #A32D2D;
     }
 
     body {
       font-family: 'Outfit', sans-serif;
-      background: var(--bg);
+      background: var(--sand);
       color: var(--text);
       min-height: 100vh;
     }
 
     /* NAV */
     nav {
-      background: var(--navy);
+      background: var(--burgundy-dark);
       padding: 0 2rem;
       height: 56px;
       display: flex;
@@ -51,31 +53,31 @@
     }
     .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .nav-mark {
-      width: 28px; height: 28px; background: var(--teal-dark);
+      width: 28px; height: 28px; background: var(--burgundy);
       border-radius: 7px; display: flex; align-items: center; justify-content: center;
     }
     .nav-mark svg { width: 16px; height: 16px; }
-    .nav-wordmark { font-family: 'DM Serif Display', serif; font-size: 20px; color: #fff; }
-    .nav-tagline { font-size: 11px; color: var(--teal-mid); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
+    .nav-wordmark { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--cream); }
+    .nav-tagline { font-size: 11px; color: var(--burgundy-mid); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
 
     /* HERO */
     .hero {
-      background: var(--navy);
+      background: var(--burgundy-dark);
       padding: 4rem 2rem 5rem;
       text-align: center;
     }
     .hero-eyebrow {
       font-size: 11px; font-weight: 500; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--teal-mid); margin-bottom: 1rem;
+      text-transform: uppercase; color: var(--burgundy-mid); margin-bottom: 1rem;
     }
     .hero-title {
       font-family: 'DM Serif Display', serif;
       font-size: clamp(2rem, 5vw, 3.5rem);
-      color: #fff; line-height: 1.15; margin-bottom: 1rem;
+      color: var(--cream); line-height: 1.15; margin-bottom: 1rem;
     }
-    .hero-title em { color: var(--teal-mid); font-style: italic; }
+    .hero-title em { color: var(--burgundy-mid); font-style: italic; }
     .hero-sub {
-      font-size: 16px; color: rgba(255,255,255,0.6);
+      font-size: 16px; color: rgba(250,247,242,0.65);
       max-width: 500px; margin: 0 auto; line-height: 1.6;
     }
 
@@ -101,7 +103,7 @@
       border-radius: 8px; padding: 10px 14px; color: var(--text);
       outline: none; transition: border-color 0.15s;
     }
-    .field-input:focus { border-color: var(--teal); }
+    .field-input:focus { border-color: var(--burgundy); }
     .field-input::placeholder { color: var(--text-tertiary); }
     textarea.field-input { resize: vertical; min-height: 130px; }
 
@@ -112,17 +114,17 @@
       cursor: pointer; background: var(--surface); color: var(--text-secondary);
       transition: all 0.15s; user-select: none;
     }
-    .chip.active { background: var(--teal-dark); color: var(--teal-light); border-color: var(--teal-dark); }
+    .chip.active { background: var(--burgundy); color: var(--cream); border-color: var(--burgundy); }
     .chip:hover:not(.active) { border-color: var(--border-hover); color: var(--text); }
 
     .audit-btn {
-      width: 100%; padding: 13px; background: var(--teal-dark);
-      color: var(--teal-light); border: none; border-radius: 8px;
+      width: 100%; padding: 13px; background: var(--burgundy);
+      color: var(--cream); border: none; border-radius: 8px;
       font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 500;
       cursor: pointer; letter-spacing: 0.02em; transition: background 0.15s;
     }
-    .audit-btn:hover { background: var(--teal); }
-    .audit-btn:disabled { background: #e0e4e8; color: #aaa; cursor: not-allowed; }
+    .audit-btn:hover { background: var(--burgundy-dark); }
+    .audit-btn:disabled { background: var(--sand-dark); color: var(--text-tertiary); cursor: not-allowed; }
 
     .error-msg {
       margin-top: 1rem; padding: 12px 16px; background: var(--fix-bg);
@@ -138,7 +140,7 @@
     .loading.show { display: block; }
     .dots { display: flex; gap: 7px; justify-content: center; margin-bottom: 14px; }
     .dot {
-      width: 9px; height: 9px; border-radius: 50%; background: var(--teal);
+      width: 9px; height: 9px; border-radius: 50%; background: var(--burgundy);
       animation: pulse 1.2s ease-in-out infinite;
     }
     .dot:nth-child(2) { animation-delay: 0.2s; }
@@ -190,10 +192,10 @@
     .row-text { font-size: 14px; color: var(--text); line-height: 1.55; }
 
     .rewrite {
-      background: var(--bg); border-left: 3px solid var(--teal);
+      background: var(--sand); border-left: 3px solid var(--burgundy);
       border-radius: 0 8px 8px 0; padding: 16px 18px; margin-top: 10px;
     }
-    .rewrite-lbl { font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal); margin-bottom: 8px; }
+    .rewrite-lbl { font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--burgundy); margin-bottom: 8px; }
     .rewrite-text { font-size: 14px; line-height: 1.65; color: var(--text); white-space: pre-wrap; }
 
     .reset-btn {
@@ -208,7 +210,7 @@
       text-align: center; padding: 2rem;
       font-size: 12px; color: var(--text-tertiary);
     }
-    footer a { color: var(--teal); text-decoration: none; }
+    footer a { color: var(--burgundy); text-decoration: none; }
 
     @media (max-width: 600px) {
       .form-grid { grid-template-columns: 1fr; }
@@ -224,7 +226,7 @@
   <a class="nav-logo" href="/">
     <div class="nav-mark">
       <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 1.5v13M3.5 5.5L8 1.5l4.5 4M3.5 10.5L8 14.5l4.5-4" stroke="#9FE1CB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M8 1.5v13M3.5 5.5L8 1.5l4.5 4M3.5 10.5L8 14.5l4.5-4" stroke="#F5EDE8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
     <span class="nav-wordmark">Signal</span>
