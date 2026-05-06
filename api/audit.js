@@ -1,15 +1,25 @@
 const https = require('https');
 
 module.exports = async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  let prompt;
+  try {
+    const bodyData = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    prompt = bodyData?.prompt;
+  } catch(e) {
+    return res.status(400).json({ error: 'Could not parse request body: ' + e.message });
   }
 
-  const { prompt } = req.body;
+  if (!prompt) return res.status(400).json({ error: 'No prompt provided' });
 
-  if (!prompt) {
-    return res.status(400).json({ error: 'No prompt provided' });
-  }
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'API key not configured' });
 
   try {
     const body = JSON.stringify({
@@ -25,7 +35,7 @@ module.exports = async function handler(req, res) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
+          'x-api-key': apiKey,
           'anthropic-version': '2023-06-01',
           'Content-Length': Buffer.byteLength(body)
         }
@@ -42,13 +52,15 @@ module.exports = async function handler(req, res) {
       reqHttp.end();
     });
 
-    return res.status(200).json({ 
-      debug: true,
-      anthropic_status: result.status,
-      anthropic_response: result.body,
-      api_key_present: !!process.env.ANTHROPIC_API_KEY,
-      api_key_prefix: process.env.ANTHROPIC_API_KEY?.slice(0, 10) + '...'
-    });
+    const parsed = JSON.parse(result.body);
+    if (result.status !== 200) {
+      return res.status(200).json({ error: parsed.error?.message || 'Anthropic error', anthropic_status: result.status });
+    }
+
+    const text = parsed.content?.map(b => b.text || '').join('') || '';
+    return res.status(200).json({ result: text });
 
   } catch(err) {
-    return res.status(200).json({ debug: true, error: err.messag
+    return res.status(200).json({ error: 'Caught error: ' + err.message });
+  }
+};
