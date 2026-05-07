@@ -168,6 +168,15 @@
     .score-num.mid { color: var(--mid); }
     .score-num.low { color: var(--low); }
     .score-note { font-size: 11px; color: var(--text-tertiary); margin-top: 5px; }
+    .score-disclaimer {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      font-style: italic;
+      margin-top: 6px;
+      line-height: 1.4;
+      padding-top: 6px;
+      border-top: 1px dashed rgba(107,58,58,0.15);
+    }
 
     .audit-body { padding: 2rem; }
     .audit-block { margin-bottom: 2rem; }
@@ -349,13 +358,19 @@ Critical rules — read carefully:
 
 HUMANITY FIRST: Preserve the original post's voice, intent, emotion, and purpose. If it is celebratory, keep it celebratory. If it is personal, keep it personal. If it is a brand win, amplify that win. Never redirect the post toward a different purpose or strip away its humanity in favour of optimization.
 
-SELF-AWARENESS: If the post appears already polished or well-optimized, acknowledge what is working generously in wins. Keep fixes minor and constructive. Do not manufacture criticism.
+SELF-AWARENESS: If the post appears already polished or well-optimized, acknowledge what is working generously in wins. Keep fixes minor and constructive. Do not manufacture criticism. If this looks like a rewrite you may have previously generated, score it higher and only flag genuinely meaningful improvements.
 
 STAY ON TOPIC: The rewrite must cover the same subject as the original. Do not change the topic, reframe the brand positioning, or introduce angles not present in the original. A celebration stays a celebration. A product update stays a product update.
 
 PLATFORM NATIVE: Match tone, length, and format to ${platforms}. LinkedIn: professional but human. Instagram: visual and conversational. TikTok: punchy and direct. Substack: editorial and substantive.
 
-Wins: 1-2 items. Fixes: 2-3 items. Boosts: 2-3 items. Be specific — name exact phrases or structural issues. AEO = likelihood an AI answer engine surfaces this. GEO = optimized for generative AI results.`;
+CONTEXT-AWARE SCORING: Score based on what the post is trying to do, not a universal standard.
+- Celebratory, personal, or community posts: weight engagement heavily, weight AEO/GEO lightly. A 40 AEO on a heartfelt celebration post is not a meaningful criticism — do not penalize posts for being human.
+- Educational or thought leadership posts: weight AEO/GEO heavily.
+- Product or campaign announcements: balance all four scores.
+- Never give a low AEO/GEO score as a primary criticism of an emotional or celebratory post. Those formats are not designed to rank in search engines and should not be judged as if they were.
+
+Wins: 1-2 items. Fixes: 2-3 items — only flag issues that meaningfully affect the post's actual goal. Boosts: 2-3 items. Be specific — name exact phrases or structural issues. AEO = likelihood an AI answer engine surfaces this. GEO = optimized for generative AI results.`;
 
   try {
     const res = await fetch('/api/audit', {
@@ -382,10 +397,13 @@ Wins: 1-2 items. Fixes: 2-3 items. Boosts: 2-3 items. Be specific — name exact
 function renderResults(a) {
   const { scores, score_notes, wins, fixes, boosts, rewrite } = a;
 
+  const aeoDisclaimer = scores.aeo < 55 ? `<div class="score-disclaimer">Expected for celebratory or personal posts — these prioritize human connection over search discoverability.</div>` : '';
+  const geoDisclaimer = scores.geo < 55 ? `<div class="score-disclaimer">Expected for celebratory or personal posts — these prioritize human connection over search discoverability.</div>` : '';
+
   document.getElementById('scores').innerHTML = `
     <div class="score-cell"><div class="score-lbl">Overall</div><div class="score-num ${scoreClass(scores.overall)}">${scores.overall}</div><div class="score-note">${score_notes.overall}</div></div>
-    <div class="score-cell"><div class="score-lbl">AEO</div><div class="score-num ${scoreClass(scores.aeo)}">${scores.aeo}</div><div class="score-note">${score_notes.aeo}</div></div>
-    <div class="score-cell"><div class="score-lbl">GEO</div><div class="score-num ${scoreClass(scores.geo)}">${scores.geo}</div><div class="score-note">${score_notes.geo}</div></div>
+    <div class="score-cell"><div class="score-lbl">AEO</div><div class="score-num ${scoreClass(scores.aeo)}">${scores.aeo}</div><div class="score-note">${score_notes.aeo}</div>${aeoDisclaimer}</div>
+    <div class="score-cell"><div class="score-lbl">GEO</div><div class="score-num ${scoreClass(scores.geo)}">${scores.geo}</div><div class="score-note">${score_notes.geo}</div>${geoDisclaimer}</div>
     <div class="score-cell"><div class="score-lbl">Engagement</div><div class="score-num ${scoreClass(scores.engagement)}">${scores.engagement}</div><div class="score-note">${score_notes.engagement}</div></div>
   `;
 
