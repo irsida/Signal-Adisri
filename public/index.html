@@ -246,11 +246,11 @@
       <div class="form-grid">
         <div>
           <div class="field-label">Brand / Handle</div>
-          <input class="field-input" id="brand" placeholder="e.g. @toplinepro or Solo Energy" />
+          <input class="field-input" id="brand" placeholder="e.g. @adisrinarayan, Patagonia, Notion" />
         </div>
         <div>
           <div class="field-label">Niche / Industry</div>
-          <input class="field-input" id="niche" placeholder="e.g. B2B SaaS, home services" />
+          <input class="field-input" id="niche" placeholder="e.g. solar SaaS, indie restaurant, advocacy nonprofit" />
         </div>
       </div>
 
@@ -340,12 +340,22 @@ Return ONLY valid JSON — no markdown, no backticks:
   "scores": { "overall": <0-100>, "aeo": <0-100>, "geo": <0-100>, "engagement": <0-100> },
   "score_notes": { "overall": "<5 words>", "aeo": "<5 words>", "geo": "<5 words>", "engagement": "<5 words>" },
   "wins": [ { "text": "<specific win and why it works>" } ],
-  "fixes": [ { "text": "<specific problem and why it hurts>" }, { "text": "<specific problem>" } ],
-  "boosts": [ { "text": "<optimization opportunity with rationale>" }, { "text": "<optimization opportunity>" } ],
-  "rewrite": "<full rewritten post — sharper hook, better structure, platform-native, AEO/GEO optimized>"
+  "fixes": [ { "text": "<specific fix>" }, { "text": "<specific fix>" } ],
+  "boosts": [ { "text": "<specific boost opportunity>" }, { "text": "<specific boost opportunity>" } ],
+  "rewrite": "<full rewritten post>"
 }
 
-Rules: wins 1-2 items, fixes 2-3 items, boosts 2-3 items. Be brutally specific — name exact phrases or structural issues. AEO = likelihood AI answer engine surfaces this. GEO = optimized for generative AI results. Rewrite must feel like a human wrote it.`;
+Critical rules — read carefully:
+
+HUMANITY FIRST: Preserve the original post's voice, intent, emotion, and purpose. If it is celebratory, keep it celebratory. If it is personal, keep it personal. If it is a brand win, amplify that win. Never redirect the post toward a different purpose or strip away its humanity in favour of optimization.
+
+SELF-AWARENESS: If the post appears already polished or well-optimized, acknowledge what is working generously in wins. Keep fixes minor and constructive. Do not manufacture criticism.
+
+STAY ON TOPIC: The rewrite must cover the same subject as the original. Do not change the topic, reframe the brand positioning, or introduce angles not present in the original. A celebration stays a celebration. A product update stays a product update.
+
+PLATFORM NATIVE: Match tone, length, and format to ${platforms}. LinkedIn: professional but human. Instagram: visual and conversational. TikTok: punchy and direct. Substack: editorial and substantive.
+
+Wins: 1-2 items. Fixes: 2-3 items. Boosts: 2-3 items. Be specific — name exact phrases or structural issues. AEO = likelihood an AI answer engine surfaces this. GEO = optimized for generative AI results.`;
 
   try {
     const res = await fetch('/api/audit', {
