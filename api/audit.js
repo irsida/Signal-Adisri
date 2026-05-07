@@ -1,66 +1,39 @@
-const https = require('https');
-
-module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
-  let prompt;
-  try {
-    const bodyData = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    prompt = bodyData?.prompt;
-  } catch(e) {
-    return res.status(400).json({ error: 'Could not parse request body: ' + e.message });
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  if (!prompt) return res.status(400).json({ error: 'No prompt provided' });
+  const { prompt } = req.body;
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'API key not configured' });
+  if (!prompt) {
+    return res.status(400).json({ error: 'No prompt provided' });
+  }
 
   try {
-    const body = JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 2000,
-      messages: [{ role: 'user', content: prompt }]
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 2000,
+        messages: [{ role: 'user', content: prompt }]
+      })
     });
 
-    const result = await new Promise((resolve, reject) => {
-      const options = {
-        hostname: 'api.anthropic.com',
-        path: '/v1/messages',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'Content-Length': Buffer.byteLength(body)
-        }
-      };
-
-      const reqHttp = https.request(options, (response) => {
-        let data = '';
-        response.on('data', chunk => { data += chunk; });
-        response.on('end', () => resolve({ status: response.statusCode, body: data }));
-      });
-
-      reqHttp.on('error', reject);
-      reqHttp.write(body);
-      reqHttp.end();
-    });
-
-    const parsed = JSON.parse(result.body);
-    if (result.status !== 200) {
-      return res.status(200).json({ error: parsed.error?.message || 'Anthropic error', anthropic_status: result.status });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      return res.status(response.status).json({ error: err.error?.message || 'Anthropic API error' });
     }
 
-    const text = parsed.content?.map(b => b.text || '').join('') || '';
-    return res.status(200).json({ result: text });
+    const data = await response.json();
+    const result = data.content?.map(b => b.text || '').join('') || '';
+    return res.status(200).json({ result });
 
-  } catch(err) {
-    return res.status(200).json({ error: 'Caught error: ' + err.message });
+  } catch (err) {
+    return res.status(500).json({ error: 'Server error: ' + err.message });
   }
-};
+}
