@@ -241,7 +241,8 @@ POST:
 ${post}
 """
 
-Return ONLY valid JSON — no markdown, no backticks:
+Return ONLY valid JSON — no markdown, no backticks, no commentary before or after the object.
+Every string value must be valid JSON: escape internal double quotes as \\", escape line breaks as \\n, and do not use trailing commas.
 {
   "scores": { "overall": <0-100>, "aeo": <0-100>, "geo": <0-100>, "engagement": <0-100> },
   "score_notes": { "overall": "<5 words>", "aeo": "<5 words>", "geo": "<5 words>", "engagement": "<5 words>" },
@@ -273,26 +274,75 @@ Wins: 1-2 items. Fixes: 2-3 items — only flag issues that meaningfully affect 
     if(!res.ok)throw new Error(`Server error: ${res.status}`);
     const data=await res.json();
     if(data.error)throw new Error(data.error);
-    const match=data.result.match(/\{[\s\S]*\}/);
-    if(!match)throw new Error('Could not parse audit response.');
-    renderResults(JSON.parse(match[0]));
+    const audit=await parseAuditResult(data.result);
+    renderResults(audit);
   }catch(e){showErr('Audit failed: '+(e.message||'Please try again.'))}
   finally{document.getElementById('loading').classList.remove('show')}
+}
+function extractJsonObject(text){
+  const start=text.indexOf('{');
+  if(start<0)throw new Error('No JSON object found.');
+  let depth=0,inString=false,escaping=false;
+  for(let i=start;i<text.length;i++){
+    const ch=text[i];
+    if(inString){
+      if(escaping){escaping=false;continue}
+      if(ch==='\\'){escaping=true;continue}
+      if(ch==='"')inString=false;
+      continue;
+    }
+    if(ch==='"'){inString=true;continue}
+    if(ch==='{')depth++;
+    if(ch==='}'){
+      depth--;
+      if(depth===0)return text.slice(start,i+1);
+    }
+  }
+  throw new Error('JSON object was incomplete.');
+}
+async function parseAuditResult(raw){
+  const first=extractJsonObject(raw);
+  try{return JSON.parse(first)}
+  catch(firstErr){
+    const repairPrompt=`Convert the text below into one valid JSON object only. Do not add markdown or commentary. Preserve the meaning, but fix malformed JSON, escape quotes/newlines inside strings, remove trailing commas, and ensure the shape is exactly:
+{
+  "scores": { "overall": 0, "aeo": 0, "geo": 0, "engagement": 0 },
+  "score_notes": { "overall": "", "aeo": "", "geo": "", "engagement": "" },
+  "wins": [ { "text": "" } ],
+  "fixes": [ { "text": "" } ],
+  "boosts": [ { "text": "" } ],
+  "rewrite": ""
+}
+
+TEXT TO FIX:
+${raw}`;
+    const res=await fetch('/api/audit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:repairPrompt})});
+    if(!res.ok)throw firstErr;
+    const data=await res.json();
+    if(data.error)throw firstErr;
+    const repaired=extractJsonObject(data.result||'');
+    return JSON.parse(repaired);
+  }
+}
+function esc(v){
+  return String(v??'').replace(/[&<>"']/g,function(ch){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+  });
 }
 function renderResults(a){
   const{scores,score_notes,wins,fixes,boosts,rewrite}=a;
   const aeoDisclaimer=scores.aeo<55?`<div class="score-disclaimer">Expected for celebratory or personal posts — these prioritize human connection over search discoverability.</div>`:'';
   const geoDisclaimer=scores.geo<55?`<div class="score-disclaimer">Expected for celebratory or personal posts — these prioritize human connection over search discoverability.</div>`:'';
   document.getElementById('scores').innerHTML=`
-    <div class="score-cell"><div class="score-lbl">Overall</div><div class="score-num ${scoreClass(scores.overall)}">${scores.overall}</div><div class="score-note">${score_notes.overall}</div></div>
-    <div class="score-cell"><div class="score-lbl">AEO</div><div class="score-num ${scoreClass(scores.aeo)}">${scores.aeo}</div><div class="score-note">${score_notes.aeo}</div>${aeoDisclaimer}</div>
-    <div class="score-cell"><div class="score-lbl">GEO</div><div class="score-num ${scoreClass(scores.geo)}">${scores.geo}</div><div class="score-note">${score_notes.geo}</div>${geoDisclaimer}</div>
-    <div class="score-cell"><div class="score-lbl">Engagement</div><div class="score-num ${scoreClass(scores.engagement)}">${scores.engagement}</div><div class="score-note">${score_notes.engagement}</div></div>`;
+    <div class="score-cell"><div class="score-lbl">Overall</div><div class="score-num ${scoreClass(scores.overall)}">${esc(scores.overall)}</div><div class="score-note">${esc(score_notes.overall)}</div></div>
+    <div class="score-cell"><div class="score-lbl">AEO</div><div class="score-num ${scoreClass(scores.aeo)}">${esc(scores.aeo)}</div><div class="score-note">${esc(score_notes.aeo)}</div>${aeoDisclaimer}</div>
+    <div class="score-cell"><div class="score-lbl">GEO</div><div class="score-num ${scoreClass(scores.geo)}">${esc(scores.geo)}</div><div class="score-note">${esc(score_notes.geo)}</div>${geoDisclaimer}</div>
+    <div class="score-cell"><div class="score-lbl">Engagement</div><div class="score-num ${scoreClass(scores.engagement)}">${esc(scores.engagement)}</div><div class="score-note">${esc(score_notes.engagement)}</div></div>`;
   let html='';
-  if(wins?.length){html+=`<div class="audit-block"><div class="block-title">What's working</div>`;wins.forEach(w=>{html+=`<div class="audit-row"><span class="tag tag-win">Win</span><div class="row-text">${w.text}</div></div>`});html+=`</div>`}
-  if(fixes?.length){html+=`<div class="audit-block"><div class="block-title">Fix these</div>`;fixes.forEach(f=>{html+=`<div class="audit-row"><span class="tag tag-fix">Fix</span><div class="row-text">${f.text}</div></div>`});html+=`</div>`}
-  if(boosts?.length){html+=`<div class="audit-block"><div class="block-title">Optimization opportunities</div>`;boosts.forEach(b=>{html+=`<div class="audit-row"><span class="tag tag-boost">Boost</span><div class="row-text">${b.text}</div></div>`});html+=`</div>`}
-  if(rewrite){html+=`<div class="audit-block"><div class="block-title">Suggested rewrite</div><div class="rewrite"><div class="rewrite-lbl">Signal rewrite</div><div class="rewrite-text">${rewrite}</div></div></div>`}
+  if(wins?.length){html+=`<div class="audit-block"><div class="block-title">What's working</div>`;wins.forEach(w=>{html+=`<div class="audit-row"><span class="tag tag-win">Win</span><div class="row-text">${esc(w.text)}</div></div>`});html+=`</div>`}
+  if(fixes?.length){html+=`<div class="audit-block"><div class="block-title">Fix these</div>`;fixes.forEach(f=>{html+=`<div class="audit-row"><span class="tag tag-fix">Fix</span><div class="row-text">${esc(f.text)}</div></div>`});html+=`</div>`}
+  if(boosts?.length){html+=`<div class="audit-block"><div class="block-title">Optimization opportunities</div>`;boosts.forEach(b=>{html+=`<div class="audit-row"><span class="tag tag-boost">Boost</span><div class="row-text">${esc(b.text)}</div></div>`});html+=`</div>`}
+  if(rewrite){html+=`<div class="audit-block"><div class="block-title">Suggested rewrite</div><div class="rewrite"><div class="rewrite-lbl">Signal rewrite</div><div class="rewrite-text">${esc(rewrite)}</div></div></div>`}
   document.getElementById('body').innerHTML=html;
   document.getElementById('results').classList.add('show');
   document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'})
